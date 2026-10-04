@@ -5,8 +5,8 @@ app.get('/api/health',(req,res)=>res.json({ok:true,name:'VOXIA',version:'1.0-bet
 app.post('/api/realtime',async(req,res)=>{
  if(!KEY())return res.status(503).send('OPENAI_API_KEY não configurada');
  try{
-  const form=new FormData();form.set('sdp',new Blob([req.body],{type:'application/sdp'}),'offer.sdp');
-  form.set('session',new Blob([JSON.stringify({type:'realtime',model:process.env.VOXIA_REALTIME_MODEL||'gpt-realtime-2.1-mini',output_modalities:['text'],audio:{input:{noise_reduction:{type:'far_field'},transcription:{model:process.env.VOXIA_TRANSCRIBE_MODEL||'gpt-4o-mini-transcribe',language:'pt',prompt:'Transcreva fielmente em português. Preserve nomes próprios e termos bíblicos quando presentes.'},turn_detection:{type:'semantic_vad'}}}})],{type:'application/json'}),'session.json');
+  const form=new FormData();form.set('sdp',req.body);
+  form.set('session',JSON.stringify({type:'realtime',model:process.env.VOXIA_REALTIME_MODEL||'gpt-realtime-2.1-mini',output_modalities:['text'],audio:{input:{noise_reduction:{type:'far_field'},transcription:{model:process.env.VOXIA_TRANSCRIBE_MODEL||'gpt-4o-mini-transcribe',language:'pt',prompt:'Transcreva fielmente em português. Preserve nomes próprios e termos bíblicos quando presentes.'},turn_detection:{type:'semantic_vad'}}}}));
   const r=await fetch('https://api.openai.com/v1/realtime/calls',{method:'POST',headers:{Authorization:`Bearer ${KEY()}`},body:form});const body=await r.text();res.status(r.status).type('application/sdp').send(body);
  }catch(e){res.status(500).send(e.message)}
 });
