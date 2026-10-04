@@ -1,0 +1,2 @@
+# Third-party research and notices
+VOXIA 1.0 Beta was architecturally informed by open-source projects including ZeroPrep (MIT), live-visuals (MIT), AutoPreso (open-source; verify repository LICENSE before direct code reuse), and Phrame (MIT). This beta does not vendor those repositories; it implements VOXIA-specific code inspired by public architectural patterns. Before any direct source-code incorporation, preserve the corresponding copyright and license notices.
