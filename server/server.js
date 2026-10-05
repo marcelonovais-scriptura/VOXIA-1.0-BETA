@@ -1,7 +1,7 @@
 const express=require('express');const path=require('path');const {buildDecision}=require('../lib/engine');
 const app=express();app.use(express.json({limit:'3mb'}));app.use(express.text({type:'application/sdp',limit:'1mb'}));app.use(express.static(path.join(__dirname,'../public')));
 const KEY=()=>process.env.OPENAI_API_KEY;
-app.get('/api/health',(req,res)=>res.json({ok:true,name:'VOXIA',version:'1.0-beta.3-context-fix',realtime:!!KEY()}));
+app.get('/api/health',(req,res)=>res.json({ok:true,name:'VOXIA',version:'1.0-beta.4-semantic-impact',realtime:!!KEY()}));
 app.post('/api/realtime',async(req,res)=>{
  if(!KEY())return res.status(503).send('OPENAI_API_KEY não configurada');
  try{
@@ -11,7 +11,7 @@ app.post('/api/realtime',async(req,res)=>{
  }catch(e){res.status(500).send(e.message)}
 });
 function extractText(j){if(j.output_text)return j.output_text;for(const o of j.output||[])for(const c of o.content||[])if(c.type==='output_text')return c.text;return ''}
-const CONTEXT_SCHEMA={type:'object',additionalProperties:false,properties:{corrected:{type:'string'},confidence:{type:'number',minimum:0,maximum:1},sceneChanged:{type:'boolean'},scene:{type:'string'},imagePrompt:{type:'string'}},required:['corrected','confidence','sceneChanged','scene','imagePrompt']};
+const CONTEXT_SCHEMA={type:'object',additionalProperties:false,properties:{kind:{type:'string',enum:['impact','bible_quote','none']},publicText:{type:'string'},confidence:{type:'number',minimum:0,maximum:1},sceneChanged:{type:'boolean'},scene:{type:'string'},imagePrompt:{type:'string'}},required:['kind','publicText','confidence','sceneChanged','scene','imagePrompt']};
 function contextModels(){
  const configured=String(process.env.VOXIA_CONTEXT_MODEL||'').trim();
  return [...new Set([configured,'gpt-6-luna','gpt-5.4-nano','gpt-4o-mini'].filter(Boolean))];
@@ -36,7 +36,7 @@ app.post('/api/context',async(req,res)=>{
  if(!KEY())return res.status(503).json({ok:false,code:'NO_API_KEY',requestId,message:'OPENAI_API_KEY não configurada'});
  const {transcript='',history='',previousScene=''}=req.body||{};
  if(!String(transcript).trim())return res.status(400).json({ok:false,code:'EMPTY_TRANSCRIPT',requestId,message:'Transcrição vazia'});
- const instructions='Você é VOXIA Context + Scene, diretor visual semântico de uma apresentação ao vivo. Corrija somente erros de reconhecimento que o contexto torne claros; nunca invente conteúdo. Se houver ambiguidade, reduza confidence. corrected deve ser uma frase natural, completa, curta e fiel. Detecte mudança de CENA VISUAL, não mera troca de palavras. imagePrompt deve descrever somente a cena visual em 16:9, sem texto.';
+ const instructions=`Você é VOXIA Context + Scene, diretor semântico visual de uma apresentação cristã ao vivo. A transcrição bruta é material INTERNO e nunca deve ser devolvida como legenda. Sua tarefa é compreender o pensamento acumulado e decidir o que merece ser projetado. kind=impact para uma síntese curta, memorável e fiel (preferencialmente 4 a 12 palavras; jamais copie toda a fala). kind=bible_quote SOMENTE quando o orador estiver citando/recitando claramente um texto bíblico; nesse caso publicText preserva integralmente a citação reconhecida, corrigindo apenas erros inequívocos de reconhecimento e sem inventar referência. kind=none quando ainda não há pensamento suficientemente completo ou seguro. publicText contém EXCLUSIVAMENTE conteúdo destinado ao público; nunca inclua instruções, metalinguagem, prompt, explicações do algoritmo, rótulos, JSON ou comandos internos. Detecte mudança de CENA VISUAL, não mera troca de palavras. scene é descrição interna curta da cena. imagePrompt é INTERNO e descreve somente a imagem 16:9, sem letras, legendas, tipografia, logos ou marcas. Se houver ambiguidade, reduza confidence. Melhor não projetar nada do que projetar conteúdo incorreto.`;
  const input=`CENA ANTERIOR: ${String(previousScene).slice(-500)}\nCONTEXTO ANTERIOR: ${String(history).slice(-1200)}\nTRANSCRIÇÃO NOVA: ${String(transcript).slice(-700)}`;
  const failures=[];
  for(const model of contextModels()){
