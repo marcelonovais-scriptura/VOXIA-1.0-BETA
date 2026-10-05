@@ -1,0 +1,12 @@
+const test=require('node:test');const assert=require('node:assert/strict');const {cleanPhrase,validPhrase,similarity,shouldChangeScene,SceneGate,buildDecision,TurnReconciler}=require('../lib/engine');
+test('cleanPhrase normaliza',()=>assert.equal(cleanPhrase('  Jesus   falou  . '),'Jesus falou.'));
+test('validPhrase rejeita fragmento e baixa confiança',()=>{assert.equal(validPhrase('Jesus caminhou para',.95),false);assert.equal(validPhrase('Jesus caminhou para Jerusalém.',.4),false);assert.equal(validPhrase('Jesus caminhou para Jerusalém.',.95),true)});
+test('similarity distingue cenas',()=>assert.ok(similarity('pastor em verdes pastos','vale escuro e sombra da morte')<.34));
+test('scene muda quando significado visual muda',()=>assert.equal(shouldChangeScene('verdes pastos','vale escuro',{confidence:.9}),true));
+test('scene mantém com baixa confiança',()=>assert.equal(shouldChangeScene('pastor','vale',{sceneChanged:true,confidence:.4}),false));
+test('SceneGate rejeita imagem obsoleta',()=>{const g=new SceneGate();const a=g.issue(),b=g.issue();assert.equal(g.accept(a),false);assert.equal(g.accept(b),true)});
+test('buildDecision conecta decisão de cena ao algoritmo',()=>{const d=buildDecision({corrected:'Ele me leva às águas tranquilas.',confidence:.95,sceneChanged:false,scene:'águas tranquilas',imagePrompt:'rio calmo'},'pastor em verdes pastos');assert.equal(d.sceneChanged,true);assert.equal(d.display,true)});
+test('TurnReconciler entrega fora de ordem na ordem causal',()=>{const got=[];const r=new TurnReconciler(x=>got.push(x.transcript));r.created('A',null);r.created('B','A');r.created('C','B');r.completed('C','terceiro');r.completed('B','segundo');assert.deepEqual(got,[]);r.completed('A','primeiro');assert.deepEqual(got,['primeiro','segundo','terceiro'])});
+test('TurnReconciler ignora vazio',()=>{const got=[];const r=new TurnReconciler(x=>got.push(x.transcript));r.completed('A','   ');assert.deepEqual(got,[])});
+test('buildDecision tolera resposta vazia sem exibir nem trocar cena',()=>{const d=buildDecision({},'cena atual');assert.equal(d.display,false);assert.equal(d.sceneChanged,false)});
+test('baixa confiança não dispara imagem mesmo se modelo pedir troca',()=>{const d=buildDecision({corrected:'Talvez seja isso.',confidence:.3,sceneChanged:true,scene:'nova cena',imagePrompt:'algo'},'cena atual');assert.equal(d.sceneChanged,false)});
