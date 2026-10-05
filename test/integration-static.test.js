@@ -8,3 +8,5 @@ test('runtime aceita eventos created e added',()=>{assert.ok(app.includes("e.typ
 test('imagem obsoleta é abortada e ainda protegida por job id',()=>{assert.ok(app.includes('imageController?.abort()'));assert.ok(app.includes('job!==latestImageJob'));assert.ok(server.includes("req.on('aborted',()=>controller.abort())"))});
 test('reconexão é limitada e não infinita',()=>{assert.ok(app.includes('reconnectAttempt>=3'));assert.ok(app.includes("['failed','disconnected'].includes"))});
 test('impact mantém fallback para corrected no runtime',()=>assert.ok(app.includes('d.displayText||d.impact||d.corrected')));
+
+test('reconciliador só bloqueia predecessor que seja áudio do usuário',()=>{assert.ok(app.includes("e.item?.role==='user'"));assert.ok(app.includes("c?.type==='input_audio'"));assert.ok(app.includes("prevItem?.isAudioUser&&!this.delivered.has(prev)"))});
