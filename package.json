@@ -1,1 +1,1 @@
-{"name":"voxia-1-beta","version":"1.0.0-beta.2","private":true,"type":"commonjs","scripts":{"start":"node server/server.js","test":"node --test test/*.test.js"},"dependencies":{"express":"^4.21.0"}}
+{"name":"voxia-1-beta","version":"1.0.0-beta.3.1","private":true,"type":"commonjs","scripts":{"start":"node server/server.js","test":"node --test test/*.test.js"},"dependencies":{"express":"^4.21.0"}}

@@ -1,0 +1,10 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');
+const app=fs.readFileSync('public/app.js','utf8');const html=fs.readFileSync('public/index.html','utf8');const server=fs.readFileSync('server/server.js','utf8');
+test('runtime preserva fluxo BETA3: realtime context image',()=>{for(const x of ["fetch('/api/realtime'","fetch('/api/context'","fetch('/api/image'"])assert.ok(app.includes(x))});
+test('LIMPAR existe e não chama closeTransport',()=>{assert.ok(html.includes('id="clear"'));const fn=app.match(/function clearStage\(\)\{([^}]|}\))*?\n/);assert.ok(app.includes("$('#clear').onclick=clearStage"));const start=app.indexOf('function clearStage()');const end=app.indexOf("$('#clear').onclick",start);assert.equal(app.slice(start,end).includes('closeTransport'),false)});
+test('contexto é serializado para preservar história e ordem',()=>assert.ok(app.includes('contextQueue=contextQueue.then(()=>processTranscript(text,itemId))')));
+test('Realtime usa semantic VAD low sem resposta automática',()=>{assert.ok(server.includes("type:'semantic_vad',eagerness:'low',create_response:false,interrupt_response:false"));assert.ok(app.includes("type:'semantic_vad',eagerness:'low',create_response:false,interrupt_response:false"))});
+test('runtime aceita eventos created e added',()=>{assert.ok(app.includes("e.type==='conversation.item.created'||e.type==='conversation.item.added'"));assert.ok(app.includes('e.previous_item_id??null'))});
+test('imagem obsoleta é abortada e ainda protegida por job id',()=>{assert.ok(app.includes('imageController?.abort()'));assert.ok(app.includes('job!==latestImageJob'));assert.ok(server.includes("req.on('aborted',()=>controller.abort())"))});
+test('reconexão é limitada e não infinita',()=>{assert.ok(app.includes('reconnectAttempt>=3'));assert.ok(app.includes("['failed','disconnected'].includes"))});
+test('impact mantém fallback para corrected no runtime',()=>assert.ok(app.includes('d.displayText||d.impact||d.corrected')));
