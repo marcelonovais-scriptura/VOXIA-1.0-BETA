@@ -1,8 +1,13 @@
-# VOXIA 1.0 BETA — Stability Candidate
-Visual Semantic Director. Linha BETA separada da VOXIA v0.5 FAST.
+# VOXIA 1.0 BETA
+Visual Semantic Director. Beta separada da v0.5 estável.
 
-## Fluxo
-Microfone -> WebRTC/OpenAI Realtime -> transcrição ordenada por item_id -> VOXIA Context serial -> frase de impacto com fallback fiel -> VOXIA Scene -> imagem assíncrona cancelável.
+## Modos
+- FRASES
+- IMAGENS
+- IMAGENS + FRASES
+
+## Motor
+Microfone selecionável -> WebRTC -> OpenAI Realtime transcription -> VOXIA Context -> confidence gate -> VOXIA Scene -> imagem assíncrona com stale-response protection.
 
 ## Render
 Build: `npm install`
@@ -10,7 +15,8 @@ Start: `npm start`
 Variável obrigatória: `OPENAI_API_KEY`
 Node recomendado: 22+
 
-## Testes
-`npm test`
+## Modelos configuráveis
+VOXIA_REALTIME_MODEL, VOXIA_TRANSCRIBE_MODEL, VOXIA_CONTEXT_MODEL, VOXIA_IMAGE_MODEL, VOXIA_IMAGE_QUALITY.
 
-Leia `VALIDATION_REPORT.md` antes do teste humano.
+## Segurança
+A chave OpenAI fica apenas no servidor. Nunca é enviada ao navegador.
