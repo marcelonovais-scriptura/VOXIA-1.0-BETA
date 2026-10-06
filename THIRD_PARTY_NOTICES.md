@@ -1,2 +1,9 @@
 # Third-party research and notices
-VOXIA 1.0 Beta was architecturally informed by open-source projects including ZeroPrep (MIT), live-visuals (MIT), AutoPreso (open-source; verify repository LICENSE before direct code reuse), and Phrame (MIT). This beta does not vendor those repositories; it implements VOXIA-specific code inspired by public architectural patterns. Before any direct source-code incorporation, preserve the corresponding copyright and license notices.
+This VOXIA beta contains VOXIA-specific code. No third-party source code was copied or vendored in this package.
+
+Architectural research consulted:
+- OpenAI Realtime Console (openai/openai-realtime-console), MIT — WebRTC/data-channel and event-observability patterns.
+- OpenAI Agents SDK JS (openai/openai-agents-js), MIT — realtime session lifecycle patterns.
+- LiveKit Agents (livekit/agents), Apache-2.0 — turn-detection, lifecycle, and reconnect patterns.
+
+Official OpenAI Realtime documentation was used as the protocol authority for event ordering, item_id reconciliation, semantic VAD, and disabling automatic responses.
