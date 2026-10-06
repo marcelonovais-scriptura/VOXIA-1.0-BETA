@@ -1,23 +1,26 @@
-# VOXIA 1.0 BETA.2 — Candidate validation
+# VOXIA 1.0 BETA.3 — Context Fix
 
-## Alterações desta candidata
-- Contexto migrou de JSON livre para Responses API com Structured Outputs (`text.format: json_schema`, `strict: true`).
-- Decisão de cena agora passa por `buildDecision(..., previousScene)` e `shouldChangeScene()` no fluxo de runtime do servidor.
-- Transcrições usam `item_id` e `previous_item_id` para reconciliar eventos concluídos fora de ordem antes de chamar o Contexto.
-- Proteção de imagem obsoleta permanece no navegador por `latestImageJob`.
-- Entrada de áudio tenta o dispositivo selecionado e, em `NotFoundError`/`OverconstrainedError`, tenta a entrada padrão.
-- Ausência de entrada de áudio gera mensagem orientativa em português.
-- v0.5 FAST não foi modificada.
+## Correção do teste real de 05/10/2026
+- Reproduzido no navegador: POST /api/context -> HTTP 502.
+- Removida dependência padrão de gpt-5-nano (deprecated).
+- Context usa Responses API + Structured Outputs (`text.format` / JSON Schema strict).
+- Ordem de tentativa: VOXIA_CONTEXT_MODEL (se configurado), gpt-6-luna, gpt-5.4-nano, gpt-4o-mini.
+- Limite de saída do Context aumentado de 300 para 800 tokens.
+- GPT-6 Luna configurado com reasoning effort `none` para baixa latência.
+- Timeout de 15s por tentativa.
+- Diagnóstico de resposta incomplete, erro upstream e saída ausente.
+- Logs: VOXIA_CONTEXT_OK / VOXIA_CONTEXT_FAIL com requestId e modelo.
+- O cliente recebe código estável CONTEXT_UPSTREAM_FAILED se todos os modelos falharem.
 
-## Testes executados localmente
-- `node --test test/*.test.js`: 11/11 aprovados.
-- `node --check`: engine, servidor e app do navegador sem erro de sintaxe.
-- Casos: fragmento, baixa confiança, similaridade/cena, stale gate, cena conectada ao buildDecision, turnos C/B/A fora de ordem, transcrição vazia, resposta contextual vazia, baixa confiança impedindo troca.
+## Verificação local
+- node --check server/server.js: OK
+- node --check public/app.js: OK
+- node --check lib/engine.js: OK
+- node --test test/engine.test.js: 11/11 PASS
 
-## Não validado localmente
-- Chamada real à OpenAI API (não foi usada credencial do usuário neste ambiente).
-- Captura de microfone/WebRTC real em navegador.
-- Deploy Render.
-- Geração real de imagem.
+## Não alegado como testado
+- Chamada real OpenAI com a chave do projeto do usuário.
+- Render/WebRTC/microfone após esta correção.
+- Geração real de imagem após esta correção.
 
-Esses itens exigem o teste humano/integrado após deploy da candidata.
+Esses pontos exigem novo deploy da BETA e teste real.
